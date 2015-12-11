@@ -1,0 +1,4 @@
+cron:
+- description: fetch data then store it
+  url: /update
+  schedule: every 1 hours
