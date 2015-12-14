@@ -60,17 +60,15 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 			url, _ = s.Attr( "href" )
 		} )
 
-		textLine := li.Find( "td:nth-child(1)" ).Text()
-		textStatus := li.Find( "td:nth-child(2)" ).Text()
-		textSummary := li.Find( "td:nth-child(3)" ).Text()
+		textLine	:= li.Find( "td:nth-child(1)" ).Text()
+		textStatus	:= li.Find( "td:nth-child(2)" ).Text()
+		textSummary	:= li.Find( "td:nth-child(3)" ).Text()
 		e := atom.Entry {
 			Title:		"■" + textLine,
 			ID:			url,
-			Link:		[]atom.Link { atom.Link{ Rel: "alternate", Href: url }, },
-			Published:	atom.Time( now ),
+			Link:		[]atom.Link { { Href: uri } },
 			Updated:	atom.Time( now ),
-			Summary:	&atom.Text { Type: "text", Body: textStatus + ": " + textSummary },
-//			Content:	&atom.Text { Type: "text", Body: "" },
+			Content:	&atom.Text { Type: "text", Body: textStatus + ": " + textSummary },
 		}
 		entries		= append( entries, &e )
 
@@ -89,6 +87,17 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	sd.Serialized	= []byte( source )
 	datastore.Put( c, keySource, &sd )
 
+	// 運行情報がなかった場合
+	if ( 0 == len( source ) ) {
+		e := atom.Entry {
+			Title:		"■運行情報",
+			ID:			uri,
+			Link:		[]atom.Link { { Href: uri } },
+			Updated:	atom.Time( now ),
+			Content:	&atom.Text { Type: "text", Body: nowJST.Format( "15:04" ) + " 現在、情報はありません" },
+		}
+		entries		= append( entries, &e )
+	}
 
 	// フィードの書き込み
 	feed.Entry		= entries
